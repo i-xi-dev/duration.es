@@ -1,1 +1,1 @@
-# duration.es
+# @i-xi-dev/duration
