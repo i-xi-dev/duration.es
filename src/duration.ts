@@ -103,9 +103,9 @@ namespace Duration {
     throw new TypeError("milliseconds");
   }
 
-  export function isNegative(milliseconds: Duration): boolean {
-    return (milliseconds < 0);
-  }
+  // export function isNegative(milliseconds: Duration): boolean {
+  //   return (milliseconds < 0);
+  // }
 
   /**
    * @param isoExt - java.time における ISO 8601 の拡張構文を受け付ける
@@ -117,18 +117,22 @@ namespace Duration {
     //XXX trimするか？
 
     const parsed =
-      /^([\-+]?)P([\-+]?[0-9]+D)(?:T([\-+]?[0-9]+H)([\-+]?[0-9]+M)([\-+]?[0-9]+(?:[\.,]?[0-9]+)S))$/i
+      /^([\-+]?)P([\-+]?[0-9]+D)?(?:T([\-+]?[0-9]+H)?([\-+]?[0-9]+M)?([\-+]?[0-9]+(?:[\.,]?[0-9]+)?S)?)?$/i
         .exec(isoExt);
 
     if (parsed) {
-      const [, dStr, hStr, mStr, sStr] = parsed;
+      const [, signStr, dStr, hStr, mStr, sStr] = parsed;
+      const isNegative = signStr === "-";
       const d = dStr ? Integer.fromString(dStr) : 0;
       const h = hStr ? Integer.fromString(hStr) : 0;
       const m = mStr ? Integer.fromString(mStr) : 0;
       const s = sStr ? Number.parseFloat(sStr) : 0;
 
-      return _daysToMillis(d) + _hoursToMillis(h) + _minutesToMillis(m) +
+      const absTotal = _daysToMillis(d) + _hoursToMillis(h) +
+        _minutesToMillis(m) +
         _secondsToMillis(s);
+
+      return (isNegative === true) ? -absTotal : absTotal;
     }
     throw new RangeError("isoExt");
   }
