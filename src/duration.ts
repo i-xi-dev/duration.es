@@ -1,4 +1,4 @@
-import { StringUtils } from "../deps.ts";
+import { Integer, StringUtils } from "../deps.ts";
 
 type Duration = number;
 
@@ -8,36 +8,40 @@ const _MINUTE = 60000;
 const _HOUR = 3600000;
 const _DAY = 86400000;
 
+function _n(n: number): number {
+  return (n === 0) ? 0 : n;
+}
+
 function _secondsToMillis(seconds: number): Duration {
-  return seconds * _SECOND;
+  return _n(seconds * _SECOND);
 }
 
 function _minutesToMillis(minutes: number): Duration {
-  return minutes * _MINUTE;
+  return _n(minutes * _MINUTE);
 }
 
 function _hoursToMillis(hours: number): Duration {
-  return hours * _HOUR;
+  return _n(hours * _HOUR);
 }
 
 function _daysToMillis(days: number): Duration {
-  return days * _DAY;
+  return _n(days * _DAY);
 }
 
 function _millisToSeconds(millis: Duration): number {
-  return millis / _SECOND;
+  return _n(millis / _SECOND);
 }
 
 function _millisToMinutes(millis: Duration): number {
-  return millis / _MINUTE;
+  return _n(millis / _MINUTE);
 }
 
 function _millisToHours(millis: Duration): number {
-  return millis / _HOUR;
+  return _n(millis / _HOUR);
 }
 
 function _millisToDays(millis: Duration): number {
-  return millis / _DAY;
+  return _n(millis / _DAY);
 }
 
 namespace Duration {
@@ -118,9 +122,9 @@ namespace Duration {
 
     if (parsed) {
       const [, dStr, hStr, mStr, sStr] = parsed;
-      const d = dStr ? Number.parseInt(dStr, 10) : 0;
-      const h = hStr ? Number.parseInt(hStr, 10) : 0;
-      const m = mStr ? Number.parseInt(mStr, 10) : 0;
+      const d = dStr ? Integer.fromString(dStr) : 0;
+      const h = hStr ? Integer.fromString(hStr) : 0;
+      const m = mStr ? Integer.fromString(mStr) : 0;
       const s = sStr ? Number.parseFloat(sStr) : 0;
 
       return _daysToMillis(d) + _hoursToMillis(h) + _minutesToMillis(m) +
