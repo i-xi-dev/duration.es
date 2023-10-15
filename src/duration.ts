@@ -123,10 +123,10 @@ namespace Duration {
     if (parsed) {
       const [, signStr, dStr, hStr, mStr, sStr] = parsed;
       const isNegative = signStr === "-";
-      const d = dStr ? Integer.fromString(dStr) : 0;
-      const h = hStr ? Integer.fromString(hStr) : 0;
-      const m = mStr ? Integer.fromString(mStr) : 0;
-      const s = sStr ? Number.parseFloat(sStr) : 0;
+      const d = dStr ? _parsePart(dStr, "D") : 0;
+      const h = hStr ? _parsePart(hStr, "H") : 0;
+      const m = mStr ? _parsePart(mStr, "M") : 0;
+      const s = sStr ? _parsePart(sStr, "S") : 0;
 
       const absTotal = _daysToMillis(d) + _hoursToMillis(h) +
         _minutesToMillis(m) +
@@ -138,6 +138,23 @@ namespace Duration {
   }
 
   //TODO toString(milliseconds: Duration, options?: ToStringOptions): string
+}
+
+//TODO 外に出す NumberFormatとか
+function _parsePart(s: string, type: string): number {
+  const unitRemoved = s.slice(0, -1);
+  if (type === "S") {
+    const f = Number.parseFloat(unitRemoved.replace(",", "."));
+    return (f === 0) ? 0 : f; // -0は0にする
+  } else {
+    const isNegative = unitRemoved.startsWith("-");
+    const signRemoved = unitRemoved.replace(/^[\-+]?/, "");
+    const leadingZeroRemoved = signRemoved.replace(/^0+/, "");
+    const absInt = leadingZeroRemoved
+      ? Integer.fromString(leadingZeroRemoved)
+      : 0;
+    return (isNegative === true) ? -absInt : absInt;
+  }
 }
 
 export { Duration };
