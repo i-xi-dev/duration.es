@@ -562,4 +562,116 @@ Deno.test("Duration.fromString(string) - dhs", () => {
   );
 });
 
-//TODO ,dh,dm,ds
+Deno.test("Duration.fromString(string) - dh", () => {
+  assertStrictEquals(Duration.fromString("P0DT0H"), 0);
+  assertStrictEquals(Duration.fromString("P1DT1H"), 90000000);
+  assertStrictEquals(Duration.fromString("P001DT001H"), 90000000);
+  assertStrictEquals(Duration.fromString("P00100DT00100H"), 9000000000);
+  assertStrictEquals(Duration.fromString("P00100DT-00100H"), 8280000000);
+  assertStrictEquals(Duration.fromString("P-00100DT00100H"), -8280000000);
+  assertStrictEquals(Duration.fromString("-P00100DT00100H"), -9000000000);
+  assertStrictEquals(Duration.fromString("-P-00100DT-00100H"), 9000000000);
+  assertStrictEquals(Duration.fromString("P-00100DT-00100H"), -9000000000);
+
+  assertStrictEquals(Duration.fromString("P00DT00H"), 0);
+  assertStrictEquals(Duration.fromString("P-0DT-0H"), 0);
+  assertStrictEquals(Duration.fromString("P+0DT+0H"), 0);
+
+  assertThrows(
+    () => {
+      Duration.fromString("PT1D1H");
+    },
+    RangeError,
+    "isoExt",
+  );
+  assertThrows(
+    () => {
+      Duration.fromString("P1D1HT");
+    },
+    RangeError,
+    "isoExt",
+  );
+  assertThrows(
+    () => {
+      Duration.fromString("P1D1H");
+    },
+    RangeError,
+    "isoExt",
+  );
+});
+
+Deno.test("Duration.fromString(string) - dm", () => {
+  assertStrictEquals(Duration.fromString("P0DT0M"), 0);
+  assertStrictEquals(Duration.fromString("P1DT1M"), 86460000);
+  assertStrictEquals(Duration.fromString("P001DT001M"), 86460000);
+  assertStrictEquals(Duration.fromString("P00100DT00100M"), 8646000000);
+  assertStrictEquals(Duration.fromString("P00100DT-00100M"), 8634000000);
+  assertStrictEquals(Duration.fromString("P-00100DT00100M"), -8634000000);
+  assertStrictEquals(Duration.fromString("-P00100DT00100M"), -8646000000);
+  assertStrictEquals(Duration.fromString("-P-00100DT-00100M"), 8646000000);
+  assertStrictEquals(Duration.fromString("P-00100DT-00100M"), -8646000000);
+
+  assertStrictEquals(Duration.fromString("P00DT00M"), 0);
+  assertStrictEquals(Duration.fromString("P-0DT-0M"), 0);
+  assertStrictEquals(Duration.fromString("P+0DT+0M"), 0);
+
+  assertThrows(
+    () => {
+      Duration.fromString("PT1D1M");
+    },
+    RangeError,
+    "isoExt",
+  );
+  assertThrows(
+    () => {
+      Duration.fromString("P1D1MT");
+    },
+    RangeError,
+    "isoExt",
+  );
+  assertThrows(
+    () => {
+      Duration.fromString("P1D1M");
+    },
+    RangeError,
+    "isoExt",
+  );
+});
+
+Deno.test("Duration.fromString(string) - ds", () => {
+  assertStrictEquals(Duration.fromString("P0DT0S"), 0);
+  assertStrictEquals(Duration.fromString("P1DT1S"), 86401000);
+  assertStrictEquals(Duration.fromString("P001DT001S"), 86401000);
+  assertStrictEquals(Duration.fromString("P00100DT00100S"), 8640100000);
+  assertStrictEquals(Duration.fromString("P00100DT-00100S"), 8639900000);
+  assertStrictEquals(Duration.fromString("P-00100DT00100S"), -8639900000);
+  assertStrictEquals(Duration.fromString("-P00100DT00100S"), -8640100000);
+  assertStrictEquals(Duration.fromString("-P-00100DT-00100S"), 8640100000);
+  assertStrictEquals(Duration.fromString("P-00100DT-00100S"), -8640100000);
+
+  assertStrictEquals(Duration.fromString("P00DT00S"), 0);
+  assertStrictEquals(Duration.fromString("P-0DT-0S"), 0);
+  assertStrictEquals(Duration.fromString("P+0DT+0S"), 0);
+
+  assertThrows(
+    () => {
+      Duration.fromString("PT1D1S");
+    },
+    RangeError,
+    "isoExt",
+  );
+  assertThrows(
+    () => {
+      Duration.fromString("P1D1ST");
+    },
+    RangeError,
+    "isoExt",
+  );
+  assertThrows(
+    () => {
+      Duration.fromString("P1D1S");
+    },
+    RangeError,
+    "isoExt",
+  );
+});
