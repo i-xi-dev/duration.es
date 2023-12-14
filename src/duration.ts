@@ -1,4 +1,4 @@
-import { Integer, StringUtils } from "../deps.ts";
+import { SafeInteger, StringUtils } from "../deps.ts";
 
 type Duration = number;
 
@@ -147,13 +147,9 @@ function _parsePart(s: string, type: string): number {
     const f = Number.parseFloat(unitRemoved.replace(",", "."));
     return (f === 0) ? 0 : f; // -0は0にする
   } else {
-    const isNegative = unitRemoved.startsWith("-");
-    const signRemoved = unitRemoved.replace(/^[\-+]?/, "");
-    const leadingZeroRemoved = signRemoved.replace(/^0+/, "");
-    const absInt = leadingZeroRemoved
-      ? Integer.fromString(leadingZeroRemoved)
-      : 0;
-    return (isNegative === true) ? -absInt : absInt;
+    return SafeInteger.fromString(unitRemoved, {
+      fallback: 0,
+    });
   }
 }
 

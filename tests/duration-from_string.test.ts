@@ -312,8 +312,14 @@ Deno.test("Duration.fromString(string) - hms", () => {
   assertStrictEquals(Duration.fromString("PT00100H-00100M00100S"), 354100000);
   assertStrictEquals(Duration.fromString("PT-00100H00100M00100S"), -353900000);
   assertStrictEquals(Duration.fromString("-PT00100H00100M00100S"), -366100000);
-  assertStrictEquals(Duration.fromString("PT-00100H-00100M-00100S"), -366100000);
-  assertStrictEquals(Duration.fromString("-PT-00100H-00100M-00100S"), 366100000);
+  assertStrictEquals(
+    Duration.fromString("PT-00100H-00100M-00100S"),
+    -366100000,
+  );
+  assertStrictEquals(
+    Duration.fromString("-PT-00100H-00100M-00100S"),
+    366100000,
+  );
 
   assertStrictEquals(Duration.fromString("PT00H00M00S"), 0);
   assertStrictEquals(Duration.fromString("PT-0H-0M-0S"), 0);
@@ -346,14 +352,38 @@ Deno.test("Duration.fromString(string) - dhms", () => {
   assertStrictEquals(Duration.fromString("P0DT0H0M0S"), 0);
   assertStrictEquals(Duration.fromString("P1DT1H1M1S"), 90061000);
   assertStrictEquals(Duration.fromString("P001DT001H001M001S"), 90061000);
-  assertStrictEquals(Duration.fromString("P00100DT00100H00100M00100S"), 9006100000);
-  assertStrictEquals(Duration.fromString("P00100DT00100H00100M-00100S"), 9005900000);
-  assertStrictEquals(Duration.fromString("P00100DT00100H-00100M00100S"), 8994100000);
-  assertStrictEquals(Duration.fromString("P00100DT-00100H00100M00100S"), 8286100000);
-  assertStrictEquals(Duration.fromString("P-00100DT00100H00100M00100S"), -8273900000);
-  assertStrictEquals(Duration.fromString("-P00100DT00100H00100M00100S"), -9006100000);
-  assertStrictEquals(Duration.fromString("-P-00100DT-00100H-00100M-00100S"), 9006100000);
-  assertStrictEquals(Duration.fromString("P-00100DT-00100H-00100M-00100S"), -9006100000);
+  assertStrictEquals(
+    Duration.fromString("P00100DT00100H00100M00100S"),
+    9006100000,
+  );
+  assertStrictEquals(
+    Duration.fromString("P00100DT00100H00100M-00100S"),
+    9005900000,
+  );
+  assertStrictEquals(
+    Duration.fromString("P00100DT00100H-00100M00100S"),
+    8994100000,
+  );
+  assertStrictEquals(
+    Duration.fromString("P00100DT-00100H00100M00100S"),
+    8286100000,
+  );
+  assertStrictEquals(
+    Duration.fromString("P-00100DT00100H00100M00100S"),
+    -8273900000,
+  );
+  assertStrictEquals(
+    Duration.fromString("-P00100DT00100H00100M00100S"),
+    -9006100000,
+  );
+  assertStrictEquals(
+    Duration.fromString("-P-00100DT-00100H-00100M-00100S"),
+    9006100000,
+  );
+  assertStrictEquals(
+    Duration.fromString("P-00100DT-00100H-00100M-00100S"),
+    -9006100000,
+  );
 
   assertStrictEquals(Duration.fromString("P00DT00H00M00S"), 0);
   assertStrictEquals(Duration.fromString("P-0DT-0H-0M-0S"), 0);
@@ -433,8 +463,14 @@ Deno.test("Duration.fromString(string) - dhm", () => {
   assertStrictEquals(Duration.fromString("P00100DT-00100H00100M"), 8286000000);
   assertStrictEquals(Duration.fromString("P-00100DT00100H00100M"), -8274000000);
   assertStrictEquals(Duration.fromString("-P00100DT00100H00100M"), -9006000000);
-  assertStrictEquals(Duration.fromString("-P-00100DT-00100H-00100M"), 9006000000);
-  assertStrictEquals(Duration.fromString("P-00100DT-00100H-00100M"), -9006000000);
+  assertStrictEquals(
+    Duration.fromString("-P-00100DT-00100H-00100M"),
+    9006000000,
+  );
+  assertStrictEquals(
+    Duration.fromString("P-00100DT-00100H-00100M"),
+    -9006000000,
+  );
 
   assertStrictEquals(Duration.fromString("P00DT00H00M"), 0);
   assertStrictEquals(Duration.fromString("P-0DT-0H-0M"), 0);
@@ -479,8 +515,14 @@ Deno.test("Duration.fromString(string) - dms", () => {
   assertStrictEquals(Duration.fromString("P00100DT-00100M00100S"), 8634100000);
   assertStrictEquals(Duration.fromString("P-00100DT00100M00100S"), -8633900000);
   assertStrictEquals(Duration.fromString("-P00100DT00100M00100S"), -8646100000);
-  assertStrictEquals(Duration.fromString("-P-00100DT-00100M-00100S"), 8646100000);
-  assertStrictEquals(Duration.fromString("P-00100DT-00100M-00100S"), -8646100000);
+  assertStrictEquals(
+    Duration.fromString("-P-00100DT-00100M-00100S"),
+    8646100000,
+  );
+  assertStrictEquals(
+    Duration.fromString("P-00100DT-00100M-00100S"),
+    -8646100000,
+  );
 
   assertStrictEquals(Duration.fromString("P00DT00M00S"), 0);
   assertStrictEquals(Duration.fromString("P-0DT-0M-0S"), 0);
@@ -525,8 +567,14 @@ Deno.test("Duration.fromString(string) - dhs", () => {
   assertStrictEquals(Duration.fromString("P00100DT-00100H00100S"), 8280100000);
   assertStrictEquals(Duration.fromString("P-00100DT00100H00100S"), -8279900000);
   assertStrictEquals(Duration.fromString("-P00100DT00100H00100S"), -9000100000);
-  assertStrictEquals(Duration.fromString("-P-00100DT-00100H-00100S"), 9000100000);
-  assertStrictEquals(Duration.fromString("P-00100DT-00100H-00100S"), -9000100000);
+  assertStrictEquals(
+    Duration.fromString("-P-00100DT-00100H-00100S"),
+    9000100000,
+  );
+  assertStrictEquals(
+    Duration.fromString("P-00100DT-00100H-00100S"),
+    -9000100000,
+  );
 
   assertStrictEquals(Duration.fromString("P00DT00H00S"), 0);
   assertStrictEquals(Duration.fromString("P-0DT-0H-0S"), 0);
