@@ -1,4 +1,4 @@
-import { SafeInteger, StringUtils } from "../deps.ts";
+import { SafeInteger, StringEx } from "../deps.ts";
 
 type Duration = number;
 
@@ -111,7 +111,7 @@ namespace Duration {
    * @param isoExt - java.time における ISO 8601 の拡張構文を受け付ける
    */
   export function fromString(isoExt: string): Duration {
-    if (StringUtils.isNonEmptyString(isoExt) !== true) {
+    if (StringEx.isNonEmptyString(isoExt) !== true) {
       throw new TypeError("isoExt");
     }
     //XXX trimするか？
