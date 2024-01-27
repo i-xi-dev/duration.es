@@ -1,6 +1,6 @@
 import { SafeInteger, StringEx } from "../deps.ts";
 
-type Duration = number;
+export type Duration = number;
 
 // const _MILLISECOND = 1;
 const _SECOND = 1000;
@@ -44,7 +44,7 @@ function _millisToDays(millis: Duration): number {
   return _n(millis / _DAY);
 }
 
-namespace Duration {
+export namespace Duration {
   export const ZERO = 0;
 
   export function ofSeconds(seconds: number): Duration {
@@ -152,5 +152,3 @@ function _parsePart(s: string, type: string): number {
     });
   }
 }
-
-export { Duration };
