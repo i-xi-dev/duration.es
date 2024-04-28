@@ -1,4 +1,10 @@
-import { NumberEx, SafeIntegerFormat, StringEx } from "../deps.ts";
+import {
+  NumberEx,
+  RoundingMode,
+  SafeInteger,
+  SafeIntegerFormat,
+  StringEx,
+} from "../deps.ts";
 
 export type Duration = number;
 
@@ -137,7 +143,157 @@ export namespace Duration {
     throw new RangeError("isoExt");
   }
 
-  //TODO toString(milliseconds: Duration, options?: ToStringOptions): string
+  export type StringOptions = {
+    pattern?: StringOptions.Pattern;
+    secondFractionDigits?: StringOptions.SecondFractionDigits;
+    //TODO style : "iso8601ext" | ...;
+  };
+
+  export namespace StringOptions {
+    export const Pattern = {
+      AUTO: "auto",
+      DAY_HOUR_MINUTE_SECOND: "dayHourMinuteSecond",
+      HOUR_MINUTE_SECOND: "hourMinuteSecond",
+      MINUTE_SECOND: "minuteSecond",
+      SECOND: "second",
+    } as const;
+    export type Pattern = typeof Pattern[keyof typeof Pattern];
+
+    //TODO Precision : auto | day | hour | minute | second
+
+    export type SecondFractionDigits = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  }
+
+  export function toString(
+    milliseconds: Duration,
+    options: StringOptions = {},
+  ): string {
+    if (Number.isFinite(milliseconds) != true) {
+      throw new TypeError("milliseconds");
+    }
+
+    const isNegative = milliseconds < 0;
+    const absMs = Math.abs(milliseconds);
+
+    const dInt = (absMs >= _DAY) ? Math.trunc(toDays(absMs)) : 0;
+    const hInt = (absMs >= _HOUR) ? Math.trunc(toHours(absMs)) : 0;
+    const mInt = (absMs >= _MINUTE) ? Math.trunc(toMinutes(absMs)) : 0;
+    const sInt = (absMs >= _SECOND) ? Math.trunc(toSeconds(absMs)) : 0;
+
+    const pattern = _normalizePattern(options.pattern);
+    const patternIsAuto = pattern === StringOptions.Pattern.AUTO;
+    const patternIsDay =
+      pattern === StringOptions.Pattern.DAY_HOUR_MINUTE_SECOND;
+    const patternIsHour = pattern === StringOptions.Pattern.HOUR_MINUTE_SECOND;
+    const patternIsMinute = pattern === StringOptions.Pattern.MINUTE_SECOND;
+
+    let result = StringEx.EMPTY;
+
+    if (patternIsDay || (patternIsAuto && (dInt > 0))) {
+      result = result + _toDayString(dInt);
+    }
+
+    result = result + "T";
+
+    if (patternIsDay || patternIsHour || (patternIsAuto && (hInt > 0))) {
+      result = result +
+        _toHourString(hInt, patternIsDay || (patternIsAuto && (dInt > 0)));
+    }
+
+    if (
+      patternIsDay || patternIsHour || patternIsMinute ||
+      (patternIsAuto && (mInt > 0))
+    ) {
+      result = result +
+        _toMinuteString(
+          mInt,
+          patternIsDay || patternIsHour || (patternIsAuto && (hInt > 0)),
+        );
+    }
+
+    result = result + _toSecondString(
+      sInt,
+      patternIsDay || patternIsHour || patternIsMinute ||
+        (patternIsAuto && (mInt > 0)),
+      absMs,
+      options.secondFractionDigits,
+    );
+
+    // 負の値であっても、0に丸まられた場合は符号なしとする
+    let sign = StringEx.EMPTY;
+    if (isNegative && /[1-9]/.test(result)) {
+      sign = "-";
+    }
+
+    return `${sign}P${result}`;
+  }
+}
+
+function _toDayString(dInt: SafeInteger): string {
+  return `${dInt}D`;
+}
+
+function _toHourString(hInt: SafeInteger, isHead: boolean): string {
+  const hIntStr = (isHead === true)
+    ? `${hInt % 24}`.padStart(2, "0")
+    : `${hInt}`;
+  return `${hIntStr}H`;
+}
+
+function _toMinuteString(mInt: SafeInteger, isHead: boolean): string {
+  const mIntStr = (isHead === true)
+    ? `${mInt % 60}`.padStart(2, "0")
+    : `${mInt}`;
+  return `${mIntStr}M`;
+}
+
+function _toSecondString(
+  sInt: SafeInteger,
+  isHead: boolean,
+  totalMs: Duration,
+  fractionDigits?: Duration.StringOptions.SecondFractionDigits,
+): string {
+  const sIntStr = (isHead === true)
+    ? `${sInt % 60}`.padStart(2, "0")
+    : `${sInt}`;
+
+  const normalizedFractionDigits = SafeInteger.fromNumber(
+    fractionDigits,
+    {
+      fallback: 0,
+      roundingMode: RoundingMode.TRUNCATE,
+      clampRange: [0, 6],
+    },
+  );
+
+  if (normalizedFractionDigits <= 0) {
+    return `${sIntStr}S`;
+  }
+
+  // ミリ秒の小数部3桁（4桁目以降は切り捨て）までを取得
+  let totalMsStr = totalMs.toFixed(4);
+  totalMsStr = totalMsStr.substring(0, totalMsStr.length - 1);
+
+  // ミリ秒の整数部3桁と小数部3桁を取得
+  const strMinLen = 7;
+  if (totalMsStr.length < strMinLen) {
+    totalMsStr = totalMsStr.padStart(strMinLen, "0");
+  }
+
+  const sFractionStr = totalMsStr.slice(-7).replace(".", StringEx.EMPTY)
+    .substring(0, normalizedFractionDigits);
+  return `${sIntStr}.${sFractionStr}S`;
+}
+
+function _normalizePattern(pattern: unknown): Duration.StringOptions.Pattern {
+  if (
+    Object.values(Duration.StringOptions.Pattern).includes(
+      pattern as Duration.StringOptions.Pattern,
+    )
+  ) {
+    return pattern as Duration.StringOptions.Pattern;
+  }
+  return Duration.StringOptions.Pattern.AUTO;
 }
 
 //TODO 外に出す NumberFormatとか
