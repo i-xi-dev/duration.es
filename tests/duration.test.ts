@@ -1,12 +1,35 @@
 import { assertStrictEquals, assertThrows } from "./deps.ts";
 import { Duration } from "../mod.ts";
 
+Deno.test("Duration.ofMilliseconds(number) / Duration.prototype.toMilliseconds()", () => {
+  assertStrictEquals(Duration.ofMilliseconds(-1000).toMilliseconds(), -1000);
+  assertStrictEquals(Duration.ofMilliseconds(-0).toMilliseconds(), 0);
+  assertStrictEquals(Duration.ofMilliseconds(0).toMilliseconds(), 0);
+  assertStrictEquals(Duration.ofMilliseconds(1000).toMilliseconds(), 1000);
+  assertStrictEquals(Duration.ofMilliseconds(1500).toMilliseconds(), 1500);
+
+  assertThrows(
+    () => {
+      Duration.ofMilliseconds(Number.NaN);
+    },
+    TypeError,
+    "milliseconds",
+  );
+  assertThrows(
+    () => {
+      Duration.ofMilliseconds("1" as unknown as number);
+    },
+    TypeError,
+    "milliseconds",
+  );
+});
+
 Deno.test("Duration.ofSeconds(number)", () => {
-  assertStrictEquals(Duration.ofSeconds(-1), -1000);
-  assertStrictEquals(Duration.ofSeconds(-0), 0);
-  assertStrictEquals(Duration.ofSeconds(0), 0);
-  assertStrictEquals(Duration.ofSeconds(1), 1000);
-  assertStrictEquals(Duration.ofSeconds(1.5), 1500);
+  assertStrictEquals(Duration.ofSeconds(-1).toMilliseconds(), -1000);
+  assertStrictEquals(Duration.ofSeconds(-0).toMilliseconds(), 0);
+  assertStrictEquals(Duration.ofSeconds(0).toMilliseconds(), 0);
+  assertStrictEquals(Duration.ofSeconds(1).toMilliseconds(), 1000);
+  assertStrictEquals(Duration.ofSeconds(1.5).toMilliseconds(), 1500);
 
   assertThrows(
     () => {
@@ -24,35 +47,20 @@ Deno.test("Duration.ofSeconds(number)", () => {
   );
 });
 
-Deno.test("Duration.toSeconds(number)", () => {
-  assertStrictEquals(Duration.toSeconds(-1000), -1);
-  assertStrictEquals(Duration.toSeconds(-0), 0);
-  assertStrictEquals(Duration.toSeconds(0), 0);
-  assertStrictEquals(Duration.toSeconds(1000), 1);
-  assertStrictEquals(Duration.toSeconds(1500), 1.5);
-
-  assertThrows(
-    () => {
-      Duration.toSeconds(Number.NaN);
-    },
-    TypeError,
-    "milliseconds",
-  );
-  assertThrows(
-    () => {
-      Duration.toSeconds("1" as unknown as number);
-    },
-    TypeError,
-    "milliseconds",
-  );
+Deno.test("Duration.prototype.toSeconds()", () => {
+  assertStrictEquals(Duration.ofMilliseconds(-1000).toSeconds(), -1);
+  assertStrictEquals(Duration.ofMilliseconds(-0).toSeconds(), 0);
+  assertStrictEquals(Duration.ofMilliseconds(0).toSeconds(), 0);
+  assertStrictEquals(Duration.ofMilliseconds(1000).toSeconds(), 1);
+  assertStrictEquals(Duration.ofMilliseconds(1500).toSeconds(), 1.5);
 });
 
 Deno.test("Duration.ofMinutes(number)", () => {
-  assertStrictEquals(Duration.ofMinutes(-1), -60000);
-  assertStrictEquals(Duration.ofMinutes(-0), 0);
-  assertStrictEquals(Duration.ofMinutes(0), 0);
-  assertStrictEquals(Duration.ofMinutes(1), 60000);
-  assertStrictEquals(Duration.ofMinutes(1.5), 90000);
+  assertStrictEquals(Duration.ofMinutes(-1).toMilliseconds(), -60000);
+  assertStrictEquals(Duration.ofMinutes(-0).toMilliseconds(), 0);
+  assertStrictEquals(Duration.ofMinutes(0).toMilliseconds(), 0);
+  assertStrictEquals(Duration.ofMinutes(1).toMilliseconds(), 60000);
+  assertStrictEquals(Duration.ofMinutes(1.5).toMilliseconds(), 90000);
 
   assertThrows(
     () => {
@@ -70,35 +78,20 @@ Deno.test("Duration.ofMinutes(number)", () => {
   );
 });
 
-Deno.test("Duration.toMinutes(number)", () => {
-  assertStrictEquals(Duration.toMinutes(-60000), -1);
-  assertStrictEquals(Duration.toMinutes(-0), 0);
-  assertStrictEquals(Duration.toMinutes(0), 0);
-  assertStrictEquals(Duration.toMinutes(60000), 1);
-  assertStrictEquals(Duration.toMinutes(90000), 1.5);
-
-  assertThrows(
-    () => {
-      Duration.toMinutes(Number.NaN);
-    },
-    TypeError,
-    "milliseconds",
-  );
-  assertThrows(
-    () => {
-      Duration.toMinutes("1" as unknown as number);
-    },
-    TypeError,
-    "milliseconds",
-  );
+Deno.test("Duration.prototype.toMinutes()", () => {
+  assertStrictEquals(Duration.ofMilliseconds(-60000).toMinutes(), -1);
+  assertStrictEquals(Duration.ofMilliseconds(-0).toMinutes(), 0);
+  assertStrictEquals(Duration.ofMilliseconds(0).toMinutes(), 0);
+  assertStrictEquals(Duration.ofMilliseconds(60000).toMinutes(), 1);
+  assertStrictEquals(Duration.ofMilliseconds(90000).toMinutes(), 1.5);
 });
 
 Deno.test("Duration.ofHours(number)", () => {
-  assertStrictEquals(Duration.ofHours(-1), -3600000);
-  assertStrictEquals(Duration.ofHours(-0), 0);
-  assertStrictEquals(Duration.ofHours(0), 0);
-  assertStrictEquals(Duration.ofHours(1), 3600000);
-  assertStrictEquals(Duration.ofHours(1.5), 5400000);
+  assertStrictEquals(Duration.ofHours(-1).toMilliseconds(), -3600000);
+  assertStrictEquals(Duration.ofHours(-0).toMilliseconds(), 0);
+  assertStrictEquals(Duration.ofHours(0).toMilliseconds(), 0);
+  assertStrictEquals(Duration.ofHours(1).toMilliseconds(), 3600000);
+  assertStrictEquals(Duration.ofHours(1.5).toMilliseconds(), 5400000);
 
   assertThrows(
     () => {
@@ -116,35 +109,20 @@ Deno.test("Duration.ofHours(number)", () => {
   );
 });
 
-Deno.test("Duration.toHours(number)", () => {
-  assertStrictEquals(Duration.toHours(-3600000), -1);
-  assertStrictEquals(Duration.toHours(-0), 0);
-  assertStrictEquals(Duration.toHours(0), 0);
-  assertStrictEquals(Duration.toHours(3600000), 1);
-  assertStrictEquals(Duration.toHours(5400000), 1.5);
-
-  assertThrows(
-    () => {
-      Duration.toHours(Number.NaN);
-    },
-    TypeError,
-    "milliseconds",
-  );
-  assertThrows(
-    () => {
-      Duration.toHours("1" as unknown as number);
-    },
-    TypeError,
-    "milliseconds",
-  );
+Deno.test("Duration.prototype.toHours()", () => {
+  assertStrictEquals(Duration.ofMilliseconds(-3600000).toHours(), -1);
+  assertStrictEquals(Duration.ofMilliseconds(-0).toHours(), 0);
+  assertStrictEquals(Duration.ofMilliseconds(0).toHours(), 0);
+  assertStrictEquals(Duration.ofMilliseconds(3600000).toHours(), 1);
+  assertStrictEquals(Duration.ofMilliseconds(5400000).toHours(), 1.5);
 });
 
 Deno.test("Duration.ofDays(number)", () => {
-  assertStrictEquals(Duration.ofDays(-1), -86400000);
-  assertStrictEquals(Duration.ofDays(-0), 0);
-  assertStrictEquals(Duration.ofDays(0), 0);
-  assertStrictEquals(Duration.ofDays(1), 86400000);
-  assertStrictEquals(Duration.ofDays(1.5), 129600000);
+  assertStrictEquals(Duration.ofDays(-1).toMilliseconds(), -86400000);
+  assertStrictEquals(Duration.ofDays(-0).toMilliseconds(), 0);
+  assertStrictEquals(Duration.ofDays(0).toMilliseconds(), 0);
+  assertStrictEquals(Duration.ofDays(1).toMilliseconds(), 86400000);
+  assertStrictEquals(Duration.ofDays(1.5).toMilliseconds(), 129600000);
 
   assertThrows(
     () => {
@@ -162,25 +140,18 @@ Deno.test("Duration.ofDays(number)", () => {
   );
 });
 
-Deno.test("Duration.toDays(number)", () => {
-  assertStrictEquals(Duration.toDays(-86400000), -1);
-  assertStrictEquals(Duration.toDays(-0), 0);
-  assertStrictEquals(Duration.toDays(0), 0);
-  assertStrictEquals(Duration.toDays(86400000), 1);
-  assertStrictEquals(Duration.toDays(129600000), 1.5);
+Deno.test("Duration.prototype.toDays()", () => {
+  assertStrictEquals(Duration.ofMilliseconds(-86400000).toDays(), -1);
+  assertStrictEquals(Duration.ofMilliseconds(-0).toDays(), 0);
+  assertStrictEquals(Duration.ofMilliseconds(0).toDays(), 0);
+  assertStrictEquals(Duration.ofMilliseconds(86400000).toDays(), 1);
+  assertStrictEquals(Duration.ofMilliseconds(129600000).toDays(), 1.5);
+});
 
-  assertThrows(
-    () => {
-      Duration.toDays(Number.NaN);
-    },
-    TypeError,
-    "milliseconds",
-  );
-  assertThrows(
-    () => {
-      Duration.toDays("1" as unknown as number);
-    },
-    TypeError,
-    "milliseconds",
-  );
+Deno.test("Duration.prototype.isNegative()", () => {
+  assertStrictEquals(Duration.ofMilliseconds(-86400000).isNegative(), true);
+  assertStrictEquals(Duration.ofMilliseconds(-0).isNegative(), false);
+  assertStrictEquals(Duration.ofMilliseconds(0).isNegative(), false);
+  assertStrictEquals(Duration.ofMilliseconds(86400000).isNegative(), false);
+  assertStrictEquals(Duration.ofMilliseconds(129600000).isNegative(), false);
 });

@@ -6,198 +6,132 @@ import {
   StringEx,
 } from "../deps.ts";
 
-export type Duration = number;
+export class Duration {
+  #milliseconds: number;
 
-// const _MILLISECOND = 1;
-const _SECOND = 1_000;
-const _MINUTE = 60_000;
-const _HOUR = 3_600_000;
-const _DAY = 86_400_000;
-
-function _secondsToMillis(seconds: number): Duration {
-  return NumberEx.normalizeNumber(seconds * _SECOND);
-}
-
-function _minutesToMillis(minutes: number): Duration {
-  return NumberEx.normalizeNumber(minutes * _MINUTE);
-}
-
-function _hoursToMillis(hours: number): Duration {
-  return NumberEx.normalizeNumber(hours * _HOUR);
-}
-
-function _daysToMillis(days: number): Duration {
-  return NumberEx.normalizeNumber(days * _DAY);
-}
-
-function _millisToSeconds(millis: Duration): number {
-  return NumberEx.normalizeNumber(millis / _SECOND);
-}
-
-function _millisToMinutes(millis: Duration): number {
-  return NumberEx.normalizeNumber(millis / _MINUTE);
-}
-
-function _millisToHours(millis: Duration): number {
-  return NumberEx.normalizeNumber(millis / _HOUR);
-}
-
-function _millisToDays(millis: Duration): number {
-  return NumberEx.normalizeNumber(millis / _DAY);
-}
-
-const _dFormatOptions = SafeIntegerFormat.Options.resolve({ suffix: "D" });
-const _hFormatOptions = SafeIntegerFormat.Options.resolve({ suffix: "H" });
-const _mFormatOptions = SafeIntegerFormat.Options.resolve({ suffix: "M" });
-
-export namespace Duration {
-  export const ZERO = 0;
-
-  export function ofSeconds(seconds: number): Duration {
-    if (Number.isFinite(seconds)) {
-      return _secondsToMillis(seconds);
+  private constructor(milliseconds: number) {
+    if (Number.isFinite(milliseconds) !== true) {
+      throw new TypeError("milliseconds");
     }
-    throw new TypeError("seconds");
+
+    this.#milliseconds = NumberEx.normalizeNumber(milliseconds);
   }
 
-  export function toSeconds(milliseconds: Duration): number {
-    if (Number.isFinite(milliseconds)) {
-      return _millisToSeconds(milliseconds);
-    }
-    throw new TypeError("milliseconds");
+  static ofMilliseconds(milliseconds: number): Duration {
+    return new Duration(milliseconds);
   }
 
-  export function ofMinutes(minutes: number): Duration {
-    if (Number.isFinite(minutes)) {
-      return _minutesToMillis(minutes);
-    }
-    throw new TypeError("minutes");
+  toMilliseconds(): number {
+    return this.#milliseconds;
   }
 
-  export function toMinutes(milliseconds: Duration): number {
-    if (Number.isFinite(milliseconds)) {
-      return _millisToMinutes(milliseconds);
-    }
-    throw new TypeError("milliseconds");
+  static ofSeconds(seconds: number): Duration {
+    return new Duration(Duration.secondsToMilliseconds(seconds));
   }
 
-  export function ofHours(hours: number): Duration {
-    if (Number.isFinite(hours)) {
-      return _hoursToMillis(hours);
-    }
-    throw new TypeError("hours");
+  toSeconds(): number {
+    return Duration.millisecondsToSeconds(this.#milliseconds);
   }
 
-  export function toHours(milliseconds: Duration): number {
-    if (Number.isFinite(milliseconds)) {
-      return _millisToHours(milliseconds);
-    }
-    throw new TypeError("milliseconds");
+  static ofMinutes(minutes: number): Duration {
+    return new Duration(Duration.minutesToMilliseconds(minutes));
   }
 
-  export function ofDays(days: number): Duration {
-    if (Number.isFinite(days)) {
-      return _daysToMillis(days);
-    }
-    throw new TypeError("days");
+  toMinutes(): number {
+    return Duration.millisecondsToMinutes(this.#milliseconds);
   }
 
-  export function toDays(milliseconds: Duration): number {
-    if (Number.isFinite(milliseconds)) {
-      return _millisToDays(milliseconds);
-    }
-    throw new TypeError("milliseconds");
+  static ofHours(hours: number): Duration {
+    return new Duration(Duration.hoursToMilliseconds(hours));
   }
 
-  // export function isNegative(milliseconds: Duration): boolean {
-  //   return (milliseconds < 0);
-  // }
+  toHours(): number {
+    return Duration.millisecondsToHours(this.#milliseconds);
+  }
 
-  /**
-   * @param isoExt - java.time における ISO 8601 の拡張構文を受け付ける
-   */
-  export function fromString(isoExt: string): Duration {
+  static ofDays(days: number): Duration {
+    return new Duration(Duration.daysToMilliseconds(days));
+  }
+
+  toDays(): number {
+    return Duration.millisecondsToDays(this.#milliseconds);
+  }
+
+  isNegative(): boolean {
+    return (this.#milliseconds < NumberEx.ZERO);
+  }
+
+  // java.time における ISO 8601 の拡張構文を受け付ける
+  static fromString(isoExt: string): Duration {
     if (StringEx.isNonEmptyString(isoExt) !== true) {
       throw new TypeError("isoExt");
     }
     //XXX trimするか？
 
-    const parsed =
+    const parsedParts =
       /^([\-+]?)P([\-+]?[0-9]+D)?(?:T([\-+]?[0-9]+H)?([\-+]?[0-9]+M)?([\-+]?[0-9]+(?:[\.,]?[0-9]+)?S)?)?$/i
         .exec(isoExt);
 
-    if (parsed) {
-      const [, signStr, dStr, hStr, mStr, sStr] = parsed;
+    if (parsedParts) {
+      const [, signStr, dStr, hStr, mStr, sStr] = parsedParts;
       const isNegative = signStr === "-";
-      const d = dStr ? SafeIntegerFormat.parse(dStr, _dFormatOptions) : 0;
-      const h = hStr ? SafeIntegerFormat.parse(hStr, _hFormatOptions) : 0;
-      const m = mStr ? SafeIntegerFormat.parse(mStr, _mFormatOptions) : 0;
-      const s = sStr ? _parseS(sStr) : 0;
+      const dInt = dStr
+        ? SafeIntegerFormat.parse(dStr, _dFormatOptions)
+        : NumberEx.ZERO;
+      const hInt = hStr
+        ? SafeIntegerFormat.parse(hStr, _hFormatOptions)
+        : NumberEx.ZERO;
+      const mInt = mStr
+        ? SafeIntegerFormat.parse(mStr, _mFormatOptions)
+        : NumberEx.ZERO;
+      const sInt = sStr ? _parseS(sStr) : NumberEx.ZERO;
 
-      const absTotal = _daysToMillis(d) + _hoursToMillis(h) +
-        _minutesToMillis(m) +
-        _secondsToMillis(s);
+      const absTotalMillis = Duration.daysToMilliseconds(dInt) +
+        Duration.hoursToMilliseconds(hInt) +
+        Duration.minutesToMilliseconds(mInt) +
+        Duration.secondsToMilliseconds(sInt);
 
-      return (isNegative === true) ? -absTotal : absTotal;
+      return new Duration(
+        (isNegative === true) ? -absTotalMillis : absTotalMillis,
+      );
     }
     throw new RangeError("isoExt");
   }
 
-  export type StringOptions = {
-    pattern?: StringOptions.Pattern;
-    secondFractionDigits?: StringOptions.SecondFractionDigits;
-    //TODO style : "iso8601ext" | ...;
-  };
+  toString(options: Duration.StringOptions = {}): string {
+    const absTotalMillis = Math.abs(this.#milliseconds);
 
-  export namespace StringOptions {
-    export const Pattern = {
-      AUTO: "auto",
-      DAY_HOUR_MINUTE_SECOND: "dayHourMinuteSecond",
-      HOUR_MINUTE_SECOND: "hourMinuteSecond",
-      MINUTE_SECOND: "minuteSecond",
-      SECOND: "second",
-    } as const;
-    export type Pattern = typeof Pattern[keyof typeof Pattern];
-
-    //TODO Precision : auto | day | hour | minute | second
-
-    export type SecondFractionDigits = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-  }
-
-  export function toString(
-    milliseconds: Duration,
-    options: StringOptions = {},
-  ): string {
-    if (Number.isFinite(milliseconds) != true) {
-      throw new TypeError("milliseconds");
-    }
-
-    const isNegative = milliseconds < 0;
-    const absMs = Math.abs(milliseconds);
-
-    const dInt = (absMs >= _DAY) ? Math.trunc(toDays(absMs)) : 0;
-    const hInt = (absMs >= _HOUR) ? Math.trunc(toHours(absMs)) : 0;
-    const mInt = (absMs >= _MINUTE) ? Math.trunc(toMinutes(absMs)) : 0;
-    const sInt = (absMs >= _SECOND) ? Math.trunc(toSeconds(absMs)) : 0;
+    const dInt = (absTotalMillis >= Duration.DAY)
+      ? Math.trunc(Duration.millisecondsToDays(absTotalMillis))
+      : 0;
+    const hInt = (absTotalMillis >= Duration.HOUR)
+      ? Math.trunc(Duration.millisecondsToHours(absTotalMillis))
+      : 0;
+    const mInt = (absTotalMillis >= Duration.MINUTE)
+      ? Math.trunc(Duration.millisecondsToMinutes(absTotalMillis))
+      : 0;
+    const sInt = (absTotalMillis >= Duration.SECOND)
+      ? Math.trunc(Duration.millisecondsToSeconds(absTotalMillis))
+      : 0;
 
     const pattern = _normalizePattern(options.pattern);
-    const patternIsAuto = pattern === StringOptions.Pattern.AUTO;
+    const patternIsAuto = pattern === Duration.StringPattern.AUTO;
     const patternIsDay =
-      pattern === StringOptions.Pattern.DAY_HOUR_MINUTE_SECOND;
-    const patternIsHour = pattern === StringOptions.Pattern.HOUR_MINUTE_SECOND;
-    const patternIsMinute = pattern === StringOptions.Pattern.MINUTE_SECOND;
+      pattern === Duration.StringPattern.DAY_HOUR_MINUTE_SECOND;
+    const patternIsHour = pattern === Duration.StringPattern.HOUR_MINUTE_SECOND;
+    const patternIsMinute = pattern === Duration.StringPattern.MINUTE_SECOND;
 
     let result = StringEx.EMPTY;
 
     if (patternIsDay || (patternIsAuto && (dInt > 0))) {
-      result = result + _toDayString(dInt);
+      result = result + _dayToString(dInt);
     }
 
     result = result + "T";
 
     if (patternIsDay || patternIsHour || (patternIsAuto && (hInt > 0))) {
       result = result +
-        _toHourString(hInt, patternIsDay || (patternIsAuto && (dInt > 0)));
+        _hourToString(hInt, patternIsDay || (patternIsAuto && (dInt > 0)));
     }
 
     if (
@@ -205,23 +139,23 @@ export namespace Duration {
       (patternIsAuto && (mInt > 0))
     ) {
       result = result +
-        _toMinuteString(
+        _minuteToString(
           mInt,
           patternIsDay || patternIsHour || (patternIsAuto && (hInt > 0)),
         );
     }
 
-    result = result + _toSecondString(
+    result = result + _secondToString(
       sInt,
       patternIsDay || patternIsHour || patternIsMinute ||
         (patternIsAuto && (mInt > 0)),
-      absMs,
+      absTotalMillis,
       options.secondFractionDigits,
     );
 
     // 負の値であっても、0に丸まられた場合は符号なしとする
     let sign = StringEx.EMPTY;
-    if (isNegative && /[1-9]/.test(result)) {
+    if (this.isNegative() && /[1-9]/.test(result)) {
       sign = "-";
     }
 
@@ -229,28 +163,134 @@ export namespace Duration {
   }
 }
 
-function _toDayString(dInt: SafeInteger): string {
+const _dFormatOptions = SafeIntegerFormat.Options.resolve({ suffix: "D" });
+const _hFormatOptions = SafeIntegerFormat.Options.resolve({ suffix: "H" });
+const _mFormatOptions = SafeIntegerFormat.Options.resolve({ suffix: "M" });
+
+export namespace Duration {
+  export const MILLISECOND = 1;
+
+  export const SECOND = 1_000;
+
+  export const MINUTE = 60_000;
+
+  export const HOUR = 3_600_000;
+
+  export const DAY = 86_400_000;
+
+  export function millisecondsToSeconds(milliseconds: number): number {
+    if (Number.isFinite(milliseconds) !== true) {
+      throw new TypeError("milliseconds");
+    }
+    return NumberEx.normalizeNumber(milliseconds / Duration.SECOND);
+  }
+
+  export function secondsToMilliseconds(seconds: number): number {
+    if (Number.isFinite(seconds) !== true) {
+      throw new TypeError("seconds");
+    }
+    return NumberEx.normalizeNumber(seconds * Duration.SECOND);
+  }
+
+  export function millisecondsToMinutes(milliseconds: number): number {
+    if (Number.isFinite(milliseconds) !== true) {
+      throw new TypeError("milliseconds");
+    }
+    return NumberEx.normalizeNumber(milliseconds / Duration.MINUTE);
+  }
+
+  export function minutesToMilliseconds(minutes: number): number {
+    if (Number.isFinite(minutes) !== true) {
+      throw new TypeError("minutes");
+    }
+    return NumberEx.normalizeNumber(minutes * Duration.MINUTE);
+  }
+
+  export function millisecondsToHours(milliseconds: number): number {
+    if (Number.isFinite(milliseconds) !== true) {
+      throw new TypeError("milliseconds");
+    }
+    return NumberEx.normalizeNumber(milliseconds / Duration.HOUR);
+  }
+
+  export function hoursToMilliseconds(hours: number): number {
+    if (Number.isFinite(hours) !== true) {
+      throw new TypeError("hours");
+    }
+    return NumberEx.normalizeNumber(hours * Duration.HOUR);
+  }
+
+  export function millisecondsToDays(milliseconds: number): number {
+    if (Number.isFinite(milliseconds) !== true) {
+      throw new TypeError("milliseconds");
+    }
+    return NumberEx.normalizeNumber(milliseconds / Duration.DAY);
+  }
+
+  export function daysToMilliseconds(days: number): number {
+    if (Number.isFinite(days) !== true) {
+      throw new TypeError("days");
+    }
+    return NumberEx.normalizeNumber(days * Duration.DAY);
+  }
+
+  export const StringPattern = {
+    AUTO: "auto",
+    DAY_HOUR_MINUTE_SECOND: "dayHourMinuteSecond",
+    HOUR_MINUTE_SECOND: "hourMinuteSecond",
+    MINUTE_SECOND: "minuteSecond",
+    SECOND: "second",
+  } as const;
+  export type StringPattern = typeof StringPattern[keyof typeof StringPattern];
+
+  export const ZERO = 0;
+
+  export type StringOptions = {
+    pattern?: StringPattern;
+    secondFractionDigits?: StringOptions.SecondFractionDigits;
+    //TODO style : "iso8601ext" | ...;
+  };
+
+  export namespace StringOptions {
+    //TODO Precision : auto | day | hour | minute | second
+
+    export type SecondFractionDigits = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  }
+}
+
+function _normalizePattern(pattern: unknown): Duration.StringPattern {
+  if (
+    Object.values(Duration.StringPattern).includes(
+      pattern as Duration.StringPattern,
+    )
+  ) {
+    return pattern as Duration.StringPattern;
+  }
+  return Duration.StringPattern.AUTO;
+}
+
+function _dayToString(dInt: SafeInteger): string {
   return `${dInt}D`;
 }
 
-function _toHourString(hInt: SafeInteger, isHead: boolean): string {
+function _hourToString(hInt: SafeInteger, isHead: boolean): string {
   const hIntStr = (isHead === true)
     ? `${hInt % 24}`.padStart(2, "0")
     : `${hInt}`;
   return `${hIntStr}H`;
 }
 
-function _toMinuteString(mInt: SafeInteger, isHead: boolean): string {
+function _minuteToString(mInt: SafeInteger, isHead: boolean): string {
   const mIntStr = (isHead === true)
     ? `${mInt % 60}`.padStart(2, "0")
     : `${mInt}`;
   return `${mIntStr}M`;
 }
 
-function _toSecondString(
+function _secondToString(
   sInt: SafeInteger,
   isHead: boolean,
-  totalMs: Duration,
+  totalMillis: number,
   fractionDigits?: Duration.StringOptions.SecondFractionDigits,
 ): string {
   const sIntStr = (isHead === true)
@@ -271,7 +311,7 @@ function _toSecondString(
   }
 
   // ミリ秒の小数部3桁（4桁目以降は切り捨て）までを取得
-  let totalMsStr = totalMs.toFixed(4);
+  let totalMsStr = totalMillis.toFixed(4);
   totalMsStr = totalMsStr.substring(0, totalMsStr.length - 1);
 
   // ミリ秒の整数部3桁と小数部3桁を取得
@@ -283,17 +323,6 @@ function _toSecondString(
   const sFractionStr = totalMsStr.slice(-7).replace(".", StringEx.EMPTY)
     .substring(0, normalizedFractionDigits);
   return `${sIntStr}.${sFractionStr}S`;
-}
-
-function _normalizePattern(pattern: unknown): Duration.StringOptions.Pattern {
-  if (
-    Object.values(Duration.StringOptions.Pattern).includes(
-      pattern as Duration.StringOptions.Pattern,
-    )
-  ) {
-    return pattern as Duration.StringOptions.Pattern;
-  }
-  return Duration.StringOptions.Pattern.AUTO;
 }
 
 //TODO 外に出す NumberFormatとか
