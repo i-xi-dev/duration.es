@@ -1,4 +1,4 @@
-import { assertStrictEquals, assertThrows } from "./deps.ts";
+import { assertStrictEquals } from "./deps.ts";
 import { Duration } from "../mod.ts";
 
 Deno.test("Duration.prototype.toString()", () => {
