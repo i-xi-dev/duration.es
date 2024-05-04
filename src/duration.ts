@@ -244,26 +244,23 @@ export namespace Duration {
     HOUR_MINUTE_SECOND: "hourMinuteSecond",
     MINUTE_SECOND: "minuteSecond",
     SECOND: "second",
+    //TODO DAY,DAY_HOUR,HOUR,...
   } as const;
   export type StringPattern = typeof StringPattern[keyof typeof StringPattern];
 
-  export const ZERO = 0;
+  export type StringSecondFractionDigits = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
   export type StringOptions = {
     pattern?: StringPattern;
-    secondFractionDigits?: StringOptions.SecondFractionDigits;
+    secondFractionDigits?: StringSecondFractionDigits;
     //TODO style : "iso8601ext" | ...;
   };
-
-  export namespace StringOptions {
-    //TODO Precision : auto | day | hour | minute | second
-
-    export type SecondFractionDigits = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-  }
 
   //TODO millisecondsToString
 
   //TODO stringToMilliseconds
+
+  export const ZERO = 0;
 }
 
 function _normalizePattern(pattern: unknown): Duration.StringPattern {
@@ -299,7 +296,7 @@ function _secondToString(
   sInt: SafeInteger,
   isHead: boolean,
   totalMillis: number,
-  fractionDigits?: Duration.StringOptions.SecondFractionDigits,
+  fractionDigits?: Duration.StringSecondFractionDigits,
 ): string {
   const sIntStr = (isHead === true)
     ? `${sInt % 60}`.padStart(2, "0")
