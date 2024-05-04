@@ -161,6 +161,10 @@ export class Duration {
 
     return `${sign}P${result}`;
   }
+
+  valueOf(): number {
+    return this.#milliseconds;
+  }
 }
 
 const _dFormatOptions = SafeIntegerFormat.Options.resolve({ suffix: "D" });

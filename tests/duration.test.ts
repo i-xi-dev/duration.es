@@ -24,6 +24,14 @@ Deno.test("Duration.ofMilliseconds(number) / Duration.prototype.toMilliseconds()
   );
 });
 
+Deno.test("Duration.prototype.valueOf()", () => {
+  assertStrictEquals(Duration.ofMilliseconds(-1000).valueOf(), -1000);
+  assertStrictEquals(Duration.ofMilliseconds(-0).valueOf(), 0);
+  assertStrictEquals(Duration.ofMilliseconds(0).valueOf(), 0);
+  assertStrictEquals(Duration.ofMilliseconds(1000).valueOf(), 1000);
+  assertStrictEquals(Duration.ofMilliseconds(1500).valueOf(), 1500);
+});
+
 Deno.test("Duration.ofSeconds(number)", () => {
   assertStrictEquals(Duration.ofSeconds(-1).toMilliseconds(), -1000);
   assertStrictEquals(Duration.ofSeconds(-0).toMilliseconds(), 0);
