@@ -260,6 +260,10 @@ export namespace Duration {
 
     export type SecondFractionDigits = 0 | 1 | 2 | 3 | 4 | 5 | 6;
   }
+
+  //TODO millisecondsToString
+
+  //TODO stringToMilliseconds
 }
 
 function _normalizePattern(pattern: unknown): Duration.StringPattern {
